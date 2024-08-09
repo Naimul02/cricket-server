@@ -27,13 +27,15 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
-        const allProductsCollection = await client.db('Website3').collection('allproducts');
-        const addToCartCollection = await client.db('Website3').collection('addtocart');
-        const confirmOrderCollection = await client.db('Website3').collection('confirmOrder');
-
+    
+        const allProductsCollection =  client.db('Website3').collection('allproducts');
+        const addToCartCollection =  client.db('Website3').collection('addtocart');
+        const confirmOrderCollection =  client.db('Website3').collection('confirmOrder');
+        const usersCollection =  client.db('Website3').collection('users');
+        
 
 
 
@@ -49,13 +51,15 @@ async function run() {
                   console.log("authorization error : " , req.headers.authorization)
                   return res.status(401).send({message : 'forbidden access'})
               }
-              const token = req.headers.authorization.split(" ")[1];
+              const token = req?.headers?.authorization.split(" ")[1];
               console.log("token : " , token);
-              jwt.verify(token , process.env.ACCESS_TOKEN_SECRET , (err , decoded) =>{
-                    if(err){
-                        // console.log("verifytoken error : " , err)
+              jwt.verify(token , process.env.ACCESS_TOKEN_SECRET , (err , decoded) => {
+                    
+                  if(err){
+                        console.log("verifytoken error : " , err)
                         return res.status(401).send({message  : 'forbidden access'})
                     }
+                    console.log("decoded : " , decoded)
                     req.decoded = decoded;
                     next();
               })
@@ -63,6 +67,12 @@ async function run() {
 
 
 
+        // users
+        app.get('/users' , async(req , res) => {
+          const info = req.body;
+          const result = await usersCollection.insertOne(info);
+          res.send(result);
+        })
         // products
         app.get('/allProducts' , async(req , res) => {
                 const result = await allProductsCollection.find().toArray();
@@ -164,6 +174,7 @@ async function run() {
     // await client.close();
   }
 }
+
 run().catch(console.dir);
 
 
