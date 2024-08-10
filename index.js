@@ -8,7 +8,12 @@ const jwt = require('jsonwebtoken');
 
 
 // middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:3000",
+    "cricket-shop-server.vercel.app",
+  ]
+}));
 app.use(express.json())
 
 
@@ -35,6 +40,7 @@ async function run() {
         const addToCartCollection =  client.db('Website3').collection('addtocart');
         const confirmOrderCollection =  client.db('Website3').collection('confirmOrder');
         const usersCollection =  client.db('Website3').collection('users');
+        const reviewCollection =  client.db('Website3').collection('review');
         
 
 
@@ -52,14 +58,14 @@ async function run() {
                   return res.status(401).send({message : 'forbidden access'})
               }
               const token = req?.headers?.authorization.split(" ")[1];
-              console.log("token : " , token);
+              
               jwt.verify(token , process.env.ACCESS_TOKEN_SECRET , (err , decoded) => {
                     
                   if(err){
-                        console.log("verifytoken error : " , err)
+                        
                         return res.status(401).send({message  : 'forbidden access'})
                     }
-                    console.log("decoded : " , decoded)
+                    
                     req.decoded = decoded;
                     next();
               })
@@ -87,11 +93,23 @@ async function run() {
                 
                 res.send(result);
         })
+        // ratings
+        app.post('/ratings' , async(req , res) => {
+          const info = req.body;
+          const result = await reviewCollection.insertOne(info);
+          res.send(result);
+        })
+        app.get('/ratings/:id' , async(req , res) => {
+            const id = req.params.id;
+            const query = {productId : id};
+            const result = await reviewCollection.find(query).toArray();
+            res.send(result);
+        })
 
         // add to cart
         app.get("/carts" ,verifyToken ,  async(req , res) => {
           const email = req?.query?.email;
-          console.log("email :  " , email);
+          // console.log("email :  " , email);
           const query = {email : email}
             const carts = await addToCartCollection.find(query).toArray();
             // console.log(carts);
@@ -100,11 +118,12 @@ async function run() {
         app.post("/carts",verifyToken ,  async (req, res) => {
           const cartItem = req?.body;
           
-          const result = await addToCartCollection .insertOne(cartItem);
+          const result = await addToCartCollection.insertOne(cartItem);
           res.send(result);
         });
         app.delete('/addtocart' ,verifyToken ,  async(req , res) => {
             const id = req.query.id;
+            console.log("id " , id)
             const query = {_id : new ObjectId(id)};
             const result = await addToCartCollection.deleteOne(query);
             // console.log("delete", result);
