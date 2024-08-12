@@ -148,8 +148,24 @@ async function run() {
         // confirm order
         app.post('/confirmorder' ,verifyToken, async(req , res) => {
             const info = req.body;
+            // console.log(info.cartsId)
             const result = await confirmOrderCollection.insertOne(info);
-            res.send(result);
+
+            const query ={ _id : {
+              $in : info.cartsId?.map(id => new ObjectId(id))
+            }}
+            const deleteResult = await addToCartCollection.deleteMany(query);
+            // console.log(deleteResult);
+            res.send({result , deleteResult});
+        })
+        app.get('/confirmorder' ,  async(req , res) => {
+            const email = req?.query?.email;
+            // console.log("emaillll : " , email)
+            const query = {email};
+            const result = await confirmOrderCollection.find(query).toArray();
+            const orders = result.map(order => order.carts[0]);
+            res.send(orders)
+            
         })
 
         // pagination
