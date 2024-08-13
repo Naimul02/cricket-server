@@ -133,7 +133,7 @@ async function run() {
         app.get("/buy/:id" ,verifyToken,  async(req ,res) => {
             const email = req.query.email;
             const id = req.params.id;
-            console.log('email and id ' , email , id);
+            // console.log('email and id ' , email , id);
 
             const query = {_id : new ObjectId(id)};
             if(!id && !email){
@@ -142,8 +142,20 @@ async function run() {
                 return;
             }
             const result = await allProductsCollection.findOne(query);
+            console.log("buyId :  , " , result);
+            const result1 = {
+                _id : result._id,
+                productName : result?.product_name,
+                quantity : 1,
+                recentPrice : result?.recent_price,
+                previousPrice : result?.prvious_price,
+                image : result?.img,
+                description : result?.description,
+                brand : result?.brand,
+                category_name : result?.category_name
+            }
             // console.log(result);
-            res.send(result);
+            res.send(result1);
         })
         // confirm order
         app.post('/confirmorder' ,verifyToken, async(req , res) => {
@@ -158,6 +170,13 @@ async function run() {
             // console.log(deleteResult);
             res.send({result , deleteResult});
         })
+        // confirm order by buy button
+        app.post('/confirmorderbyBuyButton' ,verifyToken, async(req , res) => {
+          const info = req.body;
+          const result = await confirmOrderCollection.insertOne(info);
+          console.log("post" , result)
+          res.send(result);
+      })
         app.get('/confirmorder' ,  async(req , res) => {
             const email = req?.query?.email;
             // console.log("emaillll : " , email)
@@ -166,6 +185,14 @@ async function run() {
             const orders = result.map(order => order.carts[0]);
             res.send(orders)
             
+        })
+        app.delete('/confirmorder' , async(req , res) => {
+          // Todo : delete kora baki ache
+          const id = req.query.id;
+          const query = {_id : new ObjectId(id)};
+          const result = await confirmOrderCollection.deleteOne(query);
+          console.log(id,result);
+          res.send(result);
         })
 
         // pagination
