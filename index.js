@@ -190,9 +190,9 @@ async function run() {
           // Todo : delete kora baki ache
           const id = req.query.id;
           const query = {_id : new ObjectId(id)};
-          const result = await confirmOrderCollection.deleteOne(query);
-          console.log(id,result);
-          res.send(result);
+          // const result = await confirmOrderCollection.deleteOne(query);
+          // console.log(id,result);
+          // res.send(result);
         })
 
         // pagination
