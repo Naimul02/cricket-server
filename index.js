@@ -8,12 +8,7 @@ const jwt = require('jsonwebtoken');
 
 
 // middleware
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "cricket-shop-server.vercel.app",
-  ]
-}));
+app.use(cors());
 app.use(express.json())
 
 
@@ -30,7 +25,9 @@ const client = new MongoClient(uri, {
 });
 
 async function run() {
+  
   try {
+
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     // Send a ping to confirm a successful connection
@@ -241,7 +238,7 @@ run().catch(console.dir);
 
 
 app.get('/' , (req , res) => {
-    console.log('The server is running')
+    res.send('The server is running')
 })
 
 app.listen(port , () => {
