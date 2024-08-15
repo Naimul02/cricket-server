@@ -8,7 +8,9 @@ const jwt = require('jsonwebtoken');
 
 
 // middleware
-app.use(cors());
+app.use(cors({
+  origin : ['http://localhost:3000' , 'https://cricketshop-e69fe.web.app/']
+}));
 app.use(express.json())
 
 
